@@ -1,0 +1,405 @@
+{
+  "name": "1_workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "documentId": {
+          "__rl": true,
+          "value": "https://docs.google.com/spreadsheets/d/1qrYhUeVBLQuvejiZ7-0mb_z48bZpeO2MF65Sc_l7nfw/edit",
+          "mode": "url"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 607180903,
+          "mode": "list",
+          "cachedResultName": "Form Yanıtları 1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1qrYhUeVBLQuvejiZ7-0mb_z48bZpeO2MF65Sc_l7nfw/edit#gid=607180903"
+        },
+        "event": "rowAdded",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTrigger",
+      "typeVersion": 1,
+      "position": [
+        -384,
+        -320
+      ],
+      "id": "a7663ad3-89cf-4d1c-b0a6-97574a25afc1",
+      "name": "Google Sheets Trigger",
+      "credentials": {
+        "googleSheetsTriggerOAuth2Api": {
+          "id": "IhggxoP1O4p5r9Az",
+          "name": "Google Sheets Trigger OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "7ec38454-ebab-4392-9c62-a51d32b4a146",
+              "name": "Adınız ve Soyadınız",
+              "value": "={{ $json['Adınız ve Soyadınız'] }}",
+              "type": "string"
+            },
+            {
+              "id": "028e236d-3f1d-436f-bb4e-31c54d0039bb",
+              "name": "yorum",
+              "value": "={{ $json['Ek görüş, öneri veya şikayetleriniz varsa lütfen bu alana yazınız.'] }}",
+              "type": "string"
+            },
+            {
+              "id": "61d3bd5f-5082-4810-9e2d-09648b5f7b3b",
+              "name": "mail",
+              "value": "={{ $json['E-posta Adresiniz (Hediye lokma kuponunuz bu adrese gelecektir.)'] }}",
+              "type": "string"
+            },
+            {
+              "id": "90175026-57f0-438c-97a2-d8686eea26b1",
+              "name": "kod_durumu",
+              "value": "=Aktif",
+              "type": "string"
+            },
+            {
+              "id": "b47f20ed-1eb0-48bc-ae83-e7b0cc1ae18a",
+              "name": "=odul_kodu",
+              "value": "=LOKMA-{{ $now.format('X') }}-{{ Math.floor(Math.random() * 9000) + 1000 }}",
+              "type": "string"
+            },
+            {
+              "id": "7d27ee17-cceb-49c2-8579-d1fce43be6e2",
+              "name": "AI Analizi",
+              "value": "\"\"",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -176,
+        -320
+      ],
+      "id": "049e651a-f695-4ce4-b08e-3d5036e72f28",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "https://docs.google.com/spreadsheets/d/1qrYhUeVBLQuvejiZ7-0mb_z48bZpeO2MF65Sc_l7nfw/edit",
+          "mode": "url"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 607180903,
+          "mode": "list",
+          "cachedResultName": "Form Yanıtları 1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1qrYhUeVBLQuvejiZ7-0mb_z48bZpeO2MF65Sc_l7nfw/edit#gid=607180903"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Ödül Kodu": "={{ $('Edit Fields').item.json.odul_kodu }}",
+            "Kod Durumu": "={{ $('Edit Fields').item.json.kod_durumu }}",
+            "Zaman damgası": "={{ $('Google Sheets Trigger').item.json['Zaman damgası'] }}"
+          },
+          "matchingColumns": [
+            "Zaman damgası"
+          ],
+          "schema": [
+            {
+              "id": "Zaman damgası",
+              "displayName": "Zaman damgası",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Adınız ve Soyadınız",
+              "displayName": "Adınız ve Soyadınız",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "E-posta Adresiniz (Hediye lokma kuponunuz bu adrese gelecektir.)",
+              "displayName": "E-posta Adresiniz (Hediye lokma kuponunuz bu adrese gelecektir.)",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Sipariş Türünüz",
+              "displayName": "Sipariş Türünüz",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Genel Yemek Lezzet Memnuniyetiniz",
+              "displayName": "Genel Yemek Lezzet Memnuniyetiniz",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Yediklerinizin Porsiyon Miktarı Hakkındaki Görüşünüz [Ana Yemekler]",
+              "displayName": "Yediklerinizin Porsiyon Miktarı Hakkındaki Görüşünüz [Ana Yemekler]",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Yediklerinizin Porsiyon Miktarı Hakkındaki Görüşünüz [Çorbalar]",
+              "displayName": "Yediklerinizin Porsiyon Miktarı Hakkındaki Görüşünüz [Çorbalar]",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Yediklerinizin Porsiyon Miktarı Hakkındaki Görüşünüz [Salata/Yan Lezzetler]",
+              "displayName": "Yediklerinizin Porsiyon Miktarı Hakkındaki Görüşünüz [Salata/Yan Lezzetler]",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Yediklerinizin Porsiyon Miktarı Hakkındaki Görüşünüz [Tatlılar]",
+              "displayName": "Yediklerinizin Porsiyon Miktarı Hakkındaki Görüşünüz [Tatlılar]",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "İSRAF ANALİZİ: Tabağınızda artan veya bitiremediğiniz yemek oldu mu?",
+              "displayName": "İSRAF ANALİZİ: Tabağınızda artan veya bitiremediğiniz yemek oldu mu?",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Menümüzde en çok hangi ürünümüzü beğeniyorsunuz?",
+              "displayName": "Menümüzde en çok hangi ürünümüzü beğeniyorsunuz?",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Menümüzde beğenmediğiniz ürünümüz var mı varsa neden?",
+              "displayName": "Menümüzde beğenmediğiniz ürünümüz var mı varsa neden?",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Restoranımızı tekrar ziyaret etme olasılığınız nedir?",
+              "displayName": "Restoranımızı tekrar ziyaret etme olasılığınız nedir?",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Bizi bir arkadaşınıza veya meslektaşınıza tavsiye etme olasılığınız nedir?",
+              "displayName": "Bizi bir arkadaşınıza veya meslektaşınıza tavsiye etme olasılığınız nedir?",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Ek görüş, öneri veya şikayetleriniz varsa lütfen bu alana yazınız.",
+              "displayName": "Ek görüş, öneri veya şikayetleriniz varsa lütfen bu alana yazınız.",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "AI Analizi",
+              "displayName": "AI Analizi",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Ödül Kodu",
+              "displayName": "Ödül Kodu",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Kod Durumu",
+              "displayName": "Kod Durumu",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        240,
+        -320
+      ],
+      "id": "b37d2e48-c3d8-40d9-8377-a22dc109d5b4",
+      "name": "Update row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "eiY8eKvpuJR89vS7",
+          "name": "Google Sheets OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Edit Fields').item.json.mail }}",
+        "subject": "=🎁 Hediye Lokmanız Hazır! Kodunuz: {{ $json.odul_kodu }}",
+        "message": "=<div style=\"font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #fff8f0; border-radius: 12px;\">   <h1 style=\"color: #e67e22; text-align: center;\">🍯 Hediye Lokma Kazandınız!</h1>      <p>Merhaba <strong>{{ $json['Adınız ve Soyadınız'] }}</strong>,</p>      <p>Değerli geri bildiriminiz için teşekkür ederiz! Restoranımıza katkınız olarak size özel bir hediye hazırladık:</p>      <div style=\"background-color: #e67e22; color: white; text-align: center; padding: 20px; border-radius: 10px; margin: 20px 0;\">     <p style=\"font-size: 14px; margin: 0;\">HEDİYE LOKMA KODUNUZ</p>     <h2 style=\"font-size: 32px; letter-spacing: 4px; margin: 10px 0;\">{{ $json.odul_kodu }}</h2>   </div>      <p>Bu kodu kasiyerimize göstererek <strong>1 porsiyon ücretsiz lokma tatlısı</strong> alabilirsiniz.</p>      <ul style=\"color: #666;\">     <li>Kod tek kullanımlıktır</li>     <li>30 gün geçerlidir</li>     <li>Hesap ödemesi sırasında ibraz ediniz</li>   </ul>      <p style=\"text-align: center; color: #999; font-size: 12px;\">Görüşleriniz bizim için değerlidir. Tekrar görüşmek dileğiyle! 🍽️</p> </div>",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        32,
+        -320
+      ],
+      "id": "11d22213-15a0-401c-9ffe-6fe24b3fec64",
+      "name": "Send a message",
+      "webhookId": "a86d48d8-906d-4ab9-bc2a-214abf6677d0",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "ABLxATgXuMgEfcyn",
+          "name": "Gmail OAuth2 API"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Google Sheets Trigger": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message": {
+      "main": [
+        [
+          {
+            "node": "Update row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "330bf61f-ea1d-4d62-8a23-873dc4b81cb9",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "e46e3b6897a18396ff12fc36cbc9997c8e1ba7d15aebdf270f8719ce25365a6a"
+  },
+  "id": "fzt6G7f1rMz8WpQ3",
+  "tags": []
+}

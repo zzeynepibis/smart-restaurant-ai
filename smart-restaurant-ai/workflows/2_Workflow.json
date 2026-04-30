@@ -1,0 +1,1156 @@
+{
+  "name": "2_Workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "1",
+              "name": "ai_prompt",
+              "value": "=Analyze this restaurant feedback and return ONLY a valid JSON object with these exact fields:\n\nsentiment (positive/neutral/negative)\nsatisfaction_level (high/medium/low)\nwaste_signal (yes/no) - yes if portion too large, food left over, or meal unwanted\nmain_issue (taste/portion/speed/availability/none/other)\ndemand_signal (more_of_this_meal/less_of_this_meal/no_clear_signal)\nrevisit_intent (high/medium/low)\nshort_summary (one short Turkish sentence)\n\nFeedback data:\nSelected meals: {{ $json.selected_meals }}\nTaste score: {{ $json.taste_score }}/5\nPortion feedback: {{ $json.portion_feedback }}\nLeftover amount: {{ $json.leftover_amount }}\nMissing meal: {{ $json.missing_meal }}\nRecommend score: {{ $json.recommend_score }}/10\nOpen comment: {{ $json.open_comment }}\n\nReturn ONLY the JSON object, no other text.",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "45d119e5-9a31-42cf-8870-4dd1942ec1e8",
+      "name": "[IREM] Prepare AI Input",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        464,
+        496
+      ]
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-2.5-flash",
+          "mode": "list",
+          "cachedResultName": "models/gemini-2.5-flash"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "={{ $json.ai_prompt }}"
+            }
+          ]
+        },
+        "jsonOutput": true,
+        "builtInTools": {},
+        "options": {}
+      },
+      "id": "3be49a83-d950-4424-bc3d-baf7f2137792",
+      "name": "[IREM] Analyze with Gemini",
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        688,
+        496
+      ],
+      "credentials": {
+        "googlePalmApi": {
+          "id": "xAc3QI3gii34OtcS",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "try {\n  const content = item.message?.content || item.content || JSON.stringify(item);\n  const parsed = JSON.parse(content);\n  \n  const validSentiments = [\"positive\", \"neutral\", \"negative\"];\n  const validSatisfaction = [\"high\", \"medium\", \"low\"];\n  const validWaste = [\"yes\", \"no\"];\n  const validIssues = [\"taste\", \"portion\", \"speed\", \"availability\", \"none\", \"other\"];\n  const validDemand = [\"more_of_this_meal\", \"less_of_this_meal\", \"no_clear_signal\"];\n  const validIntent = [\"high\", \"medium\", \"low\"];\n  \n  if (!validSentiments.includes(parsed.sentiment) ||\n      !validSatisfaction.includes(parsed.satisfaction_level) ||\n      !validWaste.includes(parsed.waste_signal) ||\n      !validIssues.includes(parsed.main_issue) ||\n      !validDemand.includes(parsed.demand_signal) ||\n      !validIntent.includes(parsed.revisit_intent) ||\n      !parsed.short_summary) {\n    return { ...item, parse_error: true, error_reason: \"Invalid field values\" };\n  }\n  \n  return {\n    ...item,\n    sentiment: parsed.sentiment,\n    satisfaction_level: parsed.satisfaction_level,\n    waste_signal: parsed.waste_signal,\n    main_issue: parsed.main_issue,\n    demand_signal: parsed.demand_signal,\n    revisit_intent: parsed.revisit_intent,\n    short_summary: parsed.short_summary,\n    parse_error: false\n  };\n} catch (error) {\n  return { ...item, parse_error: true, error_reason: error.message };\n}"
+      },
+      "id": "54a2d9c8-88f0-45de-929c-a0fb6f73eb48",
+      "name": "[IREM] Parse AI Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1040,
+        496
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "1",
+              "leftValue": "={{ $json.parse_error }}",
+              "operator": {
+                "type": "boolean",
+                "operation": "false"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "448ea223-9a31-425a-bb7a-8747ee447245",
+      "name": "[IREM] Check Parse Success",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1264,
+        496
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "1",
+              "name": "timestamp",
+              "value": "={{ $json.timestamp }}",
+              "type": "string"
+            },
+            {
+              "id": "2",
+              "name": "full_name",
+              "value": "={{ $json.full_name }}",
+              "type": "string"
+            },
+            {
+              "id": "3",
+              "name": "phone",
+              "value": "={{ $json.phone }}",
+              "type": "string"
+            },
+            {
+              "id": "4",
+              "name": "selected_meals",
+              "value": "={{ $json.selected_meals }}",
+              "type": "string"
+            },
+            {
+              "id": "5",
+              "name": "sentiment",
+              "value": "={{ $json.sentiment }}",
+              "type": "string"
+            },
+            {
+              "id": "6",
+              "name": "satisfaction_level",
+              "value": "={{ $json.satisfaction_level }}",
+              "type": "string"
+            },
+            {
+              "id": "7",
+              "name": "waste_signal",
+              "value": "={{ $json.waste_signal }}",
+              "type": "string"
+            },
+            {
+              "id": "8",
+              "name": "main_issue",
+              "value": "={{ $json.main_issue }}",
+              "type": "string"
+            },
+            {
+              "id": "9",
+              "name": "demand_signal",
+              "value": "={{ $json.demand_signal }}",
+              "type": "string"
+            },
+            {
+              "id": "10",
+              "name": "revisit_intent",
+              "value": "={{ $json.revisit_intent }}",
+              "type": "string"
+            },
+            {
+              "id": "11",
+              "name": "short_summary",
+              "value": "={{ $json.short_summary }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "6dcbf020-7a7d-44be-9f0a-79657c7a9d51",
+      "name": "[IREM] Prepare AnalyzedFeedback Record",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1488,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "mode": "url",
+          "value": "https://docs.google.com/spreadsheets/d/1SPmmfAFDKfTBp2wCUwa2oyGr1QuoNFpHRYs0FuHXPwg/edit?usp=sharing",
+          "__regex": "https:\\/\\/(?:drive|docs)\\.google\\.com(?:\\/.*|)\\/d\\/([0-9a-zA-Z\\-_]+)(?:\\/.*|)"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sayfa1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1SPmmfAFDKfTBp2wCUwa2oyGr1QuoNFpHRYs0FuHXPwg/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "timestamp",
+              "displayName": "timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "full_name",
+              "displayName": "full_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "phone",
+              "displayName": "phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "selected_meals",
+              "displayName": "selected_meals",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "sentiment",
+              "displayName": "sentiment",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "satisfaction_level",
+              "displayName": "satisfaction_level",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "waste_signal",
+              "displayName": "waste_signal",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "main_issue",
+              "displayName": "main_issue",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "demand_signal",
+              "displayName": "demand_signal",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "revisit_intent",
+              "displayName": "revisit_intent",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "short_summary",
+              "displayName": "short_summary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "a538bd80-223f-475d-ad9d-cb04808c7951",
+      "name": "[IREM] Save to AnalyzedFeedback",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1712,
+        400
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "eiY8eKvpuJR89vS7",
+          "name": "Google Sheets OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "c50f7932-db4a-4e43-bb4b-fa58a8a79964",
+              "name": "",
+              "value": "",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "d5ade62d-c5cf-4aa2-87b5-8329c81ef43a",
+      "name": "[IREM] Prepare AIReviewQueue Record",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1488,
+        592
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "https://docs.google.com/spreadsheets/d/1qrYhUeVBLQuvejiZ7-0mb_z48bZpeO2MF65Sc_l7nfw/edit?gid=607180903#gid=607180903",
+          "mode": "url"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "list",
+          "value": "",
+          "cachedResultName": "",
+          "cachedResultUrl": ""
+        }
+      },
+      "id": "dd2a198d-0007-496f-bb9a-a94ab8c06f1c",
+      "name": "[IREM] Save to AIReviewQueue",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1712,
+        592
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "eiY8eKvpuJR89vS7",
+          "name": "Google Sheets OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 22
+            }
+          ]
+        }
+      },
+      "id": "028681a5-4ade-4e58-91af-c7fd01876142",
+      "name": "[IREM] Daily Schedule 22:00",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        240,
+        1040
+      ]
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "list",
+          "value": "AnalyzedFeedback"
+        },
+        "options": {}
+      },
+      "id": "e8c97b97-8adb-49e0-bda8-fb0f7f3d9641",
+      "name": "[IREM] Read Todays AnalyzedFeedback",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        464,
+        1040
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const today = new Date().toISOString().split(\"T\")[0];\nconst itemDate = item.timestamp ? item.timestamp.split(\" \")[0] : \"\";\n\nif (itemDate === today) {\n  return item;\n} else {\n  return null;\n}"
+      },
+      "id": "5d31e2c0-890a-47e2-969e-c7b6bd2d9e84",
+      "name": "[IREM] Filter Todays Rows",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        688,
+        1040
+      ]
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "destinationFieldName": "all_feedback",
+        "options": {}
+      },
+      "id": "1cb8a76d-37d3-42e2-b2df-685856c5b591",
+      "name": "[IREM] Aggregate Daily Stats",
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        912,
+        1040
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const feedbackList = item.all_feedback || [];\n\nconst total = feedbackList.length;\nconst positive = feedbackList.filter(f => f.sentiment === \"positive\").length;\nconst neutral = feedbackList.filter(f => f.sentiment === \"neutral\").length;\nconst negative = feedbackList.filter(f => f.sentiment === \"negative\").length;\nconst wasteSignals = feedbackList.filter(f => f.waste_signal === \"yes\").length;\n\nreturn {\n  date: new Date().toISOString().split(\"T\")[0],\n  total_feedback_count: total,\n  positive_count: positive,\n  neutral_count: neutral,\n  negative_count: negative,\n  waste_signal_count: wasteSignals,\n  all_feedback: feedbackList\n};"
+      },
+      "id": "d0f8e30a-56e4-4083-b9bd-ca6d6ce19977",
+      "name": "[IREM] Calculate Summary Stats",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1136,
+        1040
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "1",
+              "name": "manager_prompt",
+              "value": "=Sen bir restoran yönetim danışmanısın. Bugünkü müşteri geri bildirimlerini analiz et ve Türkçe bir yönetici özeti hazırla.\n\nİstatistikler:\nToplam geri bildirim: {{ $json.total_feedback_count }}\nOlumlu: {{ $json.positive_count }}\nNötr: {{ $json.neutral_count }}\nOlumsuz: {{ $json.negative_count }}\nİsraf sinyali: {{ $json.waste_signal_count }}\n\nDetaylı veriler:\n{{ JSON.stringify($json.all_feedback, null, 2) }}\n\nLütfen şu başlıkları içeren bir özet hazırla:\n1. Genel müşteri memnuniyeti\n2. İsraf ile ilgili bulgular\n3. Artırılması veya azaltılması gereken yemekler\n4. En çok tekrar eden sorun\n5. Yarın için üç pratik aksiyon önerisi\n\nÖzeti profesyonel ama anlaşılır bir dille yaz.",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "94a69ec3-a2ca-4de6-b38b-3ba83714af7d",
+      "name": "[IREM] Prepare Manager Summary Prompt",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1360,
+        1040
+      ]
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gemini-2.0-flash-exp"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "={{ $json.manager_prompt }}"
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "id": "bcd1de2a-e039-401a-9cc3-2ea3928f3f70",
+      "name": "[IREM] Generate Manager Summary",
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        1584,
+        1040
+      ],
+      "credentials": {
+        "googlePalmApi": {
+          "id": "xAc3QI3gii34OtcS",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "1",
+              "name": "date",
+              "value": "={{ $(\"[IREM] Calculate Summary Stats\").item.json.date }}",
+              "type": "string"
+            },
+            {
+              "id": "2",
+              "name": "total_feedback_count",
+              "value": "={{ $(\"[IREM] Calculate Summary Stats\").item.json.total_feedback_count }}",
+              "type": "number"
+            },
+            {
+              "id": "3",
+              "name": "positive_count",
+              "value": "={{ $(\"[IREM] Calculate Summary Stats\").item.json.positive_count }}",
+              "type": "number"
+            },
+            {
+              "id": "4",
+              "name": "neutral_count",
+              "value": "={{ $(\"[IREM] Calculate Summary Stats\").item.json.neutral_count }}",
+              "type": "number"
+            },
+            {
+              "id": "5",
+              "name": "negative_count",
+              "value": "={{ $(\"[IREM] Calculate Summary Stats\").item.json.negative_count }}",
+              "type": "number"
+            },
+            {
+              "id": "6",
+              "name": "waste_signal_count",
+              "value": "={{ $(\"[IREM] Calculate Summary Stats\").item.json.waste_signal_count }}",
+              "type": "number"
+            },
+            {
+              "id": "7",
+              "name": "manager_summary",
+              "value": "={{ $json.message.content }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "94af5f84-481a-4254-b11f-24e889d5382e",
+      "name": "[IREM] Prepare DailySummary Record",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1936,
+        1040
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "list",
+          "value": "DailySummary"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "handlingExtraData": "insertInNewColumn"
+        }
+      },
+      "id": "74161640-ea84-4f6f-9217-33b268bfdca8",
+      "name": "[IREM] Save to DailySummary",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        2160,
+        1040
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "eiY8eKvpuJR89vS7",
+          "name": "Google Sheets OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## 🤖 AI ANALYSIS SECTION\nAnalyzes feedback using Google Gemini and saves results",
+        "color": 3
+      },
+      "id": "eadd8c26-d19b-407b-88fb-3ca02f9da6e8",
+      "name": "Sticky Note e53de981",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -96,
+        480
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 🚨 CRITICAL ALERTS SECTION\nDetects negative feedback and creates urgent alerts",
+        "color": 5
+      },
+      "id": "b569c62f-f01c-4d1d-becd-a018b88c93af",
+      "name": "Sticky Note ac6b339e",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -96,
+        768
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 📊 DAILY SUMMARY SECTION\nGenerates management report every day at 22:00",
+        "color": 4
+      },
+      "id": "6583152c-475d-4472-b327-7ee0391ab3e0",
+      "name": "Sticky Note bd7dd922",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -80,
+        1008
+      ]
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "documentId": {
+          "__rl": true,
+          "value": "https://docs.google.com/spreadsheets/d/1qrYhUeVBLQuvejiZ7-0mb_z48bZpeO2MF65Sc_l7nfw/edit",
+          "mode": "url"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 607180903,
+          "mode": "list",
+          "cachedResultName": "Form Yanıtları 1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1qrYhUeVBLQuvejiZ7-0mb_z48bZpeO2MF65Sc_l7nfw/edit#gid=607180903"
+        },
+        "event": "rowAdded",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTrigger",
+      "typeVersion": 1,
+      "position": [
+        224,
+        496
+      ],
+      "id": "ce62c213-014d-4cbc-ba62-75597d6ca021",
+      "name": "Google Sheets Trigger",
+      "credentials": {
+        "googleSheetsTriggerOAuth2Api": {
+          "id": "IhggxoP1O4p5r9Az",
+          "name": "Google Sheets Trigger OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "documentId": {
+          "__rl": true,
+          "value": "https://docs.google.com/spreadsheets/d/1qrYhUeVBLQuvejiZ7-0mb_z48bZpeO2MF65Sc_l7nfw/edit",
+          "mode": "url"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 607180903,
+          "mode": "list",
+          "cachedResultName": "Form Yanıtları 1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1qrYhUeVBLQuvejiZ7-0mb_z48bZpeO2MF65Sc_l7nfw/edit#gid=607180903"
+        },
+        "event": "rowAdded",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTrigger",
+      "typeVersion": 1,
+      "position": [
+        224,
+        816
+      ],
+      "id": "55471369-5980-4dfa-9d21-c1d246ca04c2",
+      "name": "Google Sheets Trigger1",
+      "credentials": {
+        "googleSheetsTriggerOAuth2Api": {
+          "id": "IhggxoP1O4p5r9Az",
+          "name": "Google Sheets Trigger OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const summary = ($json.short_summary || \"\").toLowerCase();\nconst comment = ($json.open_comment || \"\").toLowerCase();\nconst combinedText = summary + \" \" + comment;\n\nconst highUrgencyKeywords = [\n  \"hijyen\", \"kirli\", \"pis\", \"böcek\", \"saç\", \"zehir\",\n  \"hasta\", \"kusma\", \"mide\", \"iğrenç\", \"berbat\",\n  \"asla\", \"kesinlikle\", \"hiç\", \"rezalet\"\n];\n\nconst isHighUrgency =\n  highUrgencyKeywords.some(keyword => combinedText.includes(keyword)) ||\n  ($json.satisfaction_level === \"low\" && $json.sentiment === \"negative\");\n\nreturn {\n  ...$json,\n  urgency_level: isHighUrgency ? \"high\" : \"medium\"\n};"
+      },
+      "id": "ef92314a-acaa-442b-aa80-6a525e99a503",
+      "name": "Determine Urgency Level",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        528,
+        816
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "1",
+              "name": "timestamp",
+              "value": "={{ $json.timestamp }}",
+              "type": "string"
+            },
+            {
+              "id": "2",
+              "name": "full_name",
+              "value": "={{ $json.full_name }}",
+              "type": "string"
+            },
+            {
+              "id": "3",
+              "name": "phone",
+              "value": "={{ $json.phone }}",
+              "type": "string"
+            },
+            {
+              "id": "4",
+              "name": "main_issue",
+              "value": "={{ $json.main_issue }}",
+              "type": "string"
+            },
+            {
+              "id": "5",
+              "name": "short_summary",
+              "value": "={{ $json.short_summary }}",
+              "type": "string"
+            },
+            {
+              "id": "6",
+              "name": "urgency_level",
+              "value": "={{ $json.urgency_level }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "e94844c1-8c00-4cd5-966f-1a07b9beee1a",
+      "name": "Prepare CriticalFeedback Record",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        736,
+        816
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "https://docs.google.com/spreadsheets/d/1oLD9kAPAM0lbEZzTOuY5j-vfUY_jM8d6u1By6nGSR9M/edit?usp=sharing",
+          "mode": "url"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sayfa1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1oLD9kAPAM0lbEZzTOuY5j-vfUY_jM8d6u1By6nGSR9M/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "timestamp",
+              "displayName": "timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "full_name",
+              "displayName": "full_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "phone",
+              "displayName": "phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "main_issue",
+              "displayName": "main_issue",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "short_summary",
+              "displayName": "short_summary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "urgency_level",
+              "displayName": "urgency_level",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "4241ceba-26a3-4e56-a776-5edd3937b2ae",
+      "name": "Save to CriticalFeedback",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        960,
+        816
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "eiY8eKvpuJR89vS7",
+          "name": "Google Sheets OAuth2 API"
+        }
+      }
+    }
+  ],
+  "pinData": {
+    "Determine Urgency Level": [
+      {
+        "json": {
+          "short_summary": "çok kirliydi",
+          "open_comment": "hijyen kötüydü",
+          "sentiment": "negative",
+          "satisfaction_level": "low"
+        }
+      }
+    ]
+  },
+  "connections": {
+    "[IREM] Prepare AI Input": {
+      "main": [
+        [
+          {
+            "node": "[IREM] Analyze with Gemini",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "[IREM] Analyze with Gemini": {
+      "main": [
+        [
+          {
+            "node": "[IREM] Parse AI Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "[IREM] Parse AI Response": {
+      "main": [
+        [
+          {
+            "node": "[IREM] Check Parse Success",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "[IREM] Check Parse Success": {
+      "main": [
+        [
+          {
+            "node": "[IREM] Prepare AnalyzedFeedback Record",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "[IREM] Prepare AIReviewQueue Record",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "[IREM] Prepare AnalyzedFeedback Record": {
+      "main": [
+        [
+          {
+            "node": "[IREM] Save to AnalyzedFeedback",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "[IREM] Prepare AIReviewQueue Record": {
+      "main": [
+        [
+          {
+            "node": "[IREM] Save to AIReviewQueue",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "[IREM] Daily Schedule 22:00": {
+      "main": [
+        [
+          {
+            "node": "[IREM] Read Todays AnalyzedFeedback",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "[IREM] Read Todays AnalyzedFeedback": {
+      "main": [
+        [
+          {
+            "node": "[IREM] Filter Todays Rows",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "[IREM] Filter Todays Rows": {
+      "main": [
+        [
+          {
+            "node": "[IREM] Aggregate Daily Stats",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "[IREM] Aggregate Daily Stats": {
+      "main": [
+        [
+          {
+            "node": "[IREM] Calculate Summary Stats",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "[IREM] Calculate Summary Stats": {
+      "main": [
+        [
+          {
+            "node": "[IREM] Prepare Manager Summary Prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "[IREM] Prepare Manager Summary Prompt": {
+      "main": [
+        [
+          {
+            "node": "[IREM] Generate Manager Summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "[IREM] Generate Manager Summary": {
+      "main": [
+        [
+          {
+            "node": "[IREM] Prepare DailySummary Record",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "[IREM] Prepare DailySummary Record": {
+      "main": [
+        [
+          {
+            "node": "[IREM] Save to DailySummary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Sheets Trigger": {
+      "main": [
+        [
+          {
+            "node": "[IREM] Prepare AI Input",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Sheets Trigger1": {
+      "main": [
+        [
+          {
+            "node": "Determine Urgency Level",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Determine Urgency Level": {
+      "main": [
+        [
+          {
+            "node": "Prepare CriticalFeedback Record",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare CriticalFeedback Record": {
+      "main": [
+        [
+          {
+            "node": "Save to CriticalFeedback",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "4249c1a8-0b6e-4922-940d-b01e56263927",
+  "meta": {
+    "instanceId": "e46e3b6897a18396ff12fc36cbc9997c8e1ba7d15aebdf270f8719ce25365a6a"
+  },
+  "id": "G11LpGFOCWBPvSex",
+  "tags": []
+}

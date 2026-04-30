@@ -1,0 +1,441 @@
+{
+  "name": "3_workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "odul-dogrula",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -112,
+        -64
+      ],
+      "id": "48863449-20a7-401a-b5da-1e410af70624",
+      "name": "Webhook",
+      "webhookId": "73e76dd3-cec7-4079-9d2d-155f73b4d900"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "https://docs.google.com/spreadsheets/d/1qrYhUeVBLQuvejiZ7-0mb_z48bZpeO2MF65Sc_l7nfw/edit",
+          "mode": "url"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 607180903,
+          "mode": "list",
+          "cachedResultName": "Form Yanıtları 1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1qrYhUeVBLQuvejiZ7-0mb_z48bZpeO2MF65Sc_l7nfw/edit#gid=607180903"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "Ödül Kodu",
+              "lookupValue": "={\"odul_kodu\": \"LOKMA-1776618216-929\"}"
+            }
+          ]
+        },
+        "options": {
+          "returnFirstMatch": true
+        }
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        80,
+        -64
+      ],
+      "id": "20539519-3654-4c64-87e4-83832d323e03",
+      "name": "Get row(s) in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "eiY8eKvpuJR89vS7",
+          "name": "Google Sheets OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "6ef47a2f-79f8-4db6-a410-1610db0ae30e",
+              "leftValue": "Kod Durumu",
+              "rightValue": "Aktif",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "93caf444-433c-4d3a-8fcb-f263df780487",
+              "leftValue": "Ödül Kodu",
+              "rightValue": "gelen kod",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        288,
+        -64
+      ],
+      "id": "b2cf80a8-6ab0-4843-8d38-cf8b0cd32598",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "https://docs.google.com/spreadsheets/d/1qrYhUeVBLQuvejiZ7-0mb_z48bZpeO2MF65Sc_l7nfw/edit",
+          "mode": "url"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 607180903,
+          "mode": "list",
+          "cachedResultName": "Form Yanıtları 1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1qrYhUeVBLQuvejiZ7-0mb_z48bZpeO2MF65Sc_l7nfw/edit#gid=607180903"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Kod Durumu": "Pasif"
+          },
+          "matchingColumns": [
+            "Zaman damgası"
+          ],
+          "schema": [
+            {
+              "id": "Zaman damgası",
+              "displayName": "Zaman damgası",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Adınız ve Soyadınız",
+              "displayName": "Adınız ve Soyadınız",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "E-posta Adresiniz (Hediye lokma kuponunuz bu adrese gönderilecektir.)",
+              "displayName": "E-posta Adresiniz (Hediye lokma kuponunuz bu adrese gönderilecektir.)",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Sipariş Türünüz",
+              "displayName": "Sipariş Türünüz",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Genel Yemek Lezzet Memnuniyetiniz",
+              "displayName": "Genel Yemek Lezzet Memnuniyetiniz",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Yediklerinizin Porsiyon Miktarı Hakkındaki Görüşünüz [Ana Yemekler]",
+              "displayName": "Yediklerinizin Porsiyon Miktarı Hakkındaki Görüşünüz [Ana Yemekler]",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Yediklerinizin Porsiyon Miktarı Hakkındaki Görüşünüz [Çorbalar]",
+              "displayName": "Yediklerinizin Porsiyon Miktarı Hakkındaki Görüşünüz [Çorbalar]",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Yediklerinizin Porsiyon Miktarı Hakkındaki Görüşünüz [Salata/Yan Lezzetler]",
+              "displayName": "Yediklerinizin Porsiyon Miktarı Hakkındaki Görüşünüz [Salata/Yan Lezzetler]",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Yediklerinizin Porsiyon Miktarı Hakkındaki Görüşünüz [Tatlılar]",
+              "displayName": "Yediklerinizin Porsiyon Miktarı Hakkındaki Görüşünüz [Tatlılar]",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "İSRAF ANALİZİ: Tabağınızda artan veya bitiremediğiniz yemek oldu mu?",
+              "displayName": "İSRAF ANALİZİ: Tabağınızda artan veya bitiremediğiniz yemek oldu mu?",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Menümüzde en çok hangi ürünümüzü beğeniyorsunuz?",
+              "displayName": "Menümüzde en çok hangi ürünümüzü beğeniyorsunuz?",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Menümüzde beğenmediğiniz ürünümüz var mı varsa neden?",
+              "displayName": "Menümüzde beğenmediğiniz ürünümüz var mı varsa neden?",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Restoranımızı tekrar ziyaret etme olasılığınız nedir?",
+              "displayName": "Restoranımızı tekrar ziyaret etme olasılığınız nedir?",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Bizi bir arkadaşınıza veya meslektaşınıza tavsiye etme olasılığınız nedir?",
+              "displayName": "Bizi bir arkadaşınıza veya meslektaşınıza tavsiye etme olasılığınız nedir?",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Ek görüş, öneri veya şikayetleriniz varsa lütfen bu alana yazınız.",
+              "displayName": "Ek görüş, öneri veya şikayetleriniz varsa lütfen bu alana yazınız.",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "AI Analizi",
+              "displayName": "AI Analizi",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Ödül Kodu",
+              "displayName": "Ödül Kodu",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Kod Durumu",
+              "displayName": "Kod Durumu",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        480,
+        -256
+      ],
+      "id": "e88d41cd-441a-485e-9eba-32c8b05db03b",
+      "name": "Update row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "eiY8eKvpuJR89vS7",
+          "name": "Google Sheets OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\n  \"durum\": \"success\",\n  \"mesaj\": \"Kod geçerli, lokma hakkı verildi!\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        704,
+        -256
+      ],
+      "id": "0ad1004f-af0f-4ec6-a6bc-ec5d91bbd272",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\n  \"durum\": \"error\", \n  \"mesaj\": \"Kod geçersiz veya daha önce kullanılmış.\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        480,
+        112
+      ],
+      "id": "d67d97a8-6bcf-4e66-a04b-fd56e2d2600c",
+      "name": "Respond to Webhook1"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Update row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond to Webhook1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "timeSavedMode": "fixed",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "versionId": "e3953516-a398-4913-a58d-36b53f9fb52e",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "e46e3b6897a18396ff12fc36cbc9997c8e1ba7d15aebdf270f8719ce25365a6a"
+  },
+  "id": "IsdG1NePu9hWfbiQ",
+  "tags": []
+}
