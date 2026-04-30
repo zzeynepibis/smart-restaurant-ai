@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kasiyer Paneli</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0f0f0f; --surface: #1a1a1a; --surface2: #242424;
+    --accent: #f0a500; --text: #f5f5f0; --muted: #888;
+    --success: #4caf82; --danger: #e05252; --border: #2e2e2e;
+  }
+  body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 40px 20px; }
+  .header { text-align: center; margin-bottom: 48px; }
+  .badge { display: inline-block; background: var(--accent); color: #000; font-family: 'Syne', sans-serif; font-weight: 700; font-size: 11px; letter-spacing: 3px; text-transform: uppercase; padding: 6px 16px; border-radius: 2px; margin-bottom: 20px; }
+  h1 { font-family: 'Syne', sans-serif; font-size: clamp(28px, 5vw, 48px); font-weight: 800; letter-spacing: -1px; }
+  h1 span { color: var(--accent); }
+  .subtitle { color: var(--muted); font-size: 15px; margin-top: 10px; }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 36px; width: 100%; max-width: 500px; }
+  .search-area { display: flex; gap: 12px; margin-bottom: 28px; }
+  input[type="text"] { flex: 1; background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; padding: 14px 18px; color: var(--text); font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 600; letter-spacing: 2px; outline: none; transition: border-color 0.2s; }
+  input[type="text"]:focus { border-color: var(--accent); }
+  input[type="text"]::placeholder { color: var(--muted); font-weight: 400; letter-spacing: 1px; font-size: 14px; }
+  .btn { padding: 14px 22px; border-radius: 10px; border: none; font-family: 'Syne', sans-serif; font-weight: 700; font-size: 14px; cursor: pointer; transition: all 0.2s; white-space: nowrap; }
+  .btn-primary { background: var(--accent); color: #000; }
+  .btn-primary:hover { background: #ffb820; transform: translateY(-1px); }
+  .btn-danger { background: var(--danger); color: #fff; width: 100%; padding: 16px; font-size: 15px; border-radius: 12px; margin-top: 20px; }
+  .btn-danger:hover { background: #c94040; }
+  .btn-danger:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+  .result-box { display: none; background: var(--surface2); border-radius: 12px; padding: 24px; border-left: 4px solid var(--accent); }
+  .result-box.show { display: block; }
+  .result-box.used { border-left-color: var(--danger); }
+  .result-box.notfound { border-left-color: var(--muted); }
+  .result-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 14px; }
+  .result-row:last-child { border-bottom: none; }
+  .result-row .label { color: var(--muted); }
+  .status-badge { display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; font-family: 'Syne', sans-serif; }
+  .status-active { background: rgba(76,175,130,0.15); color: var(--success); }
+  .status-used { background: rgba(224,82,82,0.15); color: var(--danger); }
+  .dot { width: 7px; height: 7px; border-radius: 50%; }
+  .dot-green { background: var(--success); }
+  .dot-red { background: var(--danger); }
+  .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(80px); background: var(--success); color: #fff; padding: 14px 28px; border-radius: 30px; font-family: 'Syne', sans-serif; font-weight: 600; font-size: 14px; transition: transform 0.35s cubic-bezier(.34,1.56,.64,1); z-index: 999; }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+  .toast.error { background: var(--danger); }
+  .section-label { font-family: 'Syne', sans-serif; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin-bottom: 16px; }
+  .loading-spinner { display: none; text-align: center; padding: 10px; color: var(--muted); font-size: 14px; }
+  .loading-spinner.show { display: block; }
+</style>
+</head>
+<body>
+<div class="header">
+  <div class="badge">🍽 Restoran Paneli</div>
+  <h1>Kasiyer <span>Ekranı</span></h1>
+  <p class="subtitle">Müşteri ödül kodunu girin, durumunu kontrol edin</p>
+</div>
+
+<div class="card">
+  <div class="section-label">Kod Sorgula</div>
+  <div class="search-area">
+    <input type="text" id="codeInput" placeholder="Ödül kodunu girin..." maxlength="50">
+    <button class="btn btn-primary" onclick="searchCode()">Sorgula</button>
+  </div>
+  <div class="loading-spinner" id="loadingSpinner">⏳ Sorgulanıyor...</div>
+  <div class="result-box" id="resultBox">
+    <div id="resultContent"></div>
+    <button class="btn btn-danger" id="useBtn" onclick="useCode()" disabled>
+      ✓ Kodu Kullanıldı Olarak İşaretle
+    </button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  let currentCode = "";
+
+  function searchCode() {
+    const code = document.getElementById("codeInput").value.trim();
+    if (!code) return showToast("Lütfen bir kod girin", true);
+    currentCode = code;
+    document.getElementById("loadingSpinner").classList.add("show");
+    document.getElementById("resultBox").className = "result-box";
+
+    google.script.run
+      .withSuccessHandler(function(data) {
+        document.getElementById("loadingSpinner").classList.remove("show");
+        showResult(data);
+      })
+      .withFailureHandler(function(e) {
+        document.getElementById("loadingSpinner").classList.remove("show");
+        showToast("Hata: " + e.message, true);
+      })
+      .getCodeInfo(code);
+  }
+
+  function showResult(data) {
+    const box = document.getElementById("resultBox");
+    const content = document.getElementById("resultContent");
+    const useBtn = document.getElementById("useBtn");
+    box.className = "result-box show";
+
+    if (!data.found) {
+      box.classList.add("notfound");
+      content.innerHTML = '<div style="color:var(--muted);text-align:center;padding:10px 0">Bu koda ait kayıt bulunamadı.</div>';
+      useBtn.disabled = true;
+      return;
+    }
+
+    const isUsed = data.status === "Kullanıldı";
+    if (isUsed) box.classList.add("used");
+
+    content.innerHTML = `
+      <div class="result-row"><span class="label">Müşteri</span><span>${data.name}</span></div>
+      <div class="result-row"><span class="label">E-posta</span><span style="font-size:13px">${data.email}</span></div>
+      <div class="result-row"><span class="label">Kod</span><span style="font-family:'Syne',sans-serif;letter-spacing:2px">${currentCode}</span></div>
+      <div class="result-row">
+        <span class="label">Durum</span>
+        <span class="status-badge ${isUsed ? 'status-used' : 'status-active'}">
+          <span class="dot ${isUsed ? 'dot-red' : 'dot-green'}"></span>
+          ${isUsed ? 'Kullanıldı' : 'Aktif'}
+        </span>
+      </div>
+    `;
+    useBtn.disabled = isUsed;
+    useBtn.textContent = isUsed ? "✕ Bu kod zaten kullanıldı" : "✓ Kodu Kullanıldı Olarak İşaretle";
+  }
+
+  function useCode() {
+    google.script.run
+      .withSuccessHandler(function(data) {
+        if (data.success) {
+          showToast("Kod başarıyla kullanıldı olarak işaretlendi ✓");
+          searchCode();
+        } else {
+          showToast("Hata: " + (data.error || "Bilinmeyen hata"), true);
+        }
+      })
+      .withFailureHandler(function(e) {
+        showToast("Hata: " + e.message, true);
+      })
+      .useCode(currentCode);
+  }
+
+  function showToast(msg, isError = false) {
+    const t = document.getElementById("toast");
+    t.textContent = msg;
+    t.className = "toast show" + (isError ? " error" : "");
+    setTimeout(() => t.className = "toast", 3000);
+  }
+
+  document.getElementById("codeInput").addEventListener("keydown", e => {
+    if (e.key === "Enter") searchCode();
+  });
+</script>
+</body>
+</html>
