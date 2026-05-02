@@ -28,9 +28,9 @@ Google Sheets (Form_Responses)
     n8n Workflows
    ┌────┼────────────────┐
    │    │                │
-1_workflow           2_workflow          3_workflow
-(Email + Ödül Kodu)  (AI Analiz +       (Kod Doğrulama
-                      Kritik Uyarı +     Webhook)
+1_workflow           2_workflow       
+(Email + Ödül Kodu)  (AI Analiz +       
+                      Kritik Uyarı +   
                       Günlük Rapor)
         ↓
 Google Apps Script (Web App)
